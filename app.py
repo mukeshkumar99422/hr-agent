@@ -79,8 +79,18 @@ for i, (col,label) in enumerate(zip(cols,labels)):
                 unsafe_allow_html=True,
             )
 
-st.divider()
-st.divider()
+st.html("""
+    <style>
+        .rainbow-divider {
+            border: 0;
+            height: 4px;
+            background: linear-gradient(to right, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
+            border-radius: 5px;
+            margin: 2rem 0;
+        }
+    </style>
+    <hr class="rainbow-divider">
+""")
 
 # routers
 from ui_pages import (
