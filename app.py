@@ -80,6 +80,7 @@ for i, (col,label) in enumerate(zip(cols,labels)):
             )
 
 st.divider()
+st.divider()
 
 # routers
 from ui_pages import (
