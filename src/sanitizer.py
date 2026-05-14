@@ -10,7 +10,7 @@ INJECTION_PATTERNS = [
     r"forget (all )?previous",
     r"new instructions?:",
     r"override (all )?instructions?",
-    r"act as (?!a candidate|an applicant)",  # allow "act as a candidate"
+    r"act as (?!a candidate|an applicant)",
 ]
 
 INJECTION_REGEX = re.compile(
