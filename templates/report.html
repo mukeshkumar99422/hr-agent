@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HR Shortlist Report — {{ jd.title }}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #1a1a1a; background: #f5f5f5; padding: 32px 16px; }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .meta { font-size: 12px; color: #666; margin-bottom: 24px; }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 14px 16px; }
+  .stat-n { font-size: 24px; font-weight: 600; }
+  .stat-l { font-size: 11px; color: #888; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e5e5; margin-bottom: 28px; }
+  thead { background: #f9f9f9; }
+  th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e5e5; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .hire    { background: #d1fae5; color: #065f46; }
+  .review  { background: #fef3c7; color: #92400e; }
+  .no-hire { background: #fee2e2; color: #991b1b; }
+  .score-cell { font-weight: 600; }
+  .hi   { color: #059669; }
+  .mid  { color: #d97706; }
+  .lo   { color: #dc2626; }
+  .detail { margin-bottom: 24px; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; }
+  .detail-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #e5e5e5; background: #fafafa; }
+  .detail-name { font-weight: 600; font-size: 15px; }
+  .dim-table { width: 100%; border-collapse: collapse; }
+  .dim-table td { padding: 8px 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+  .dim-table tr:last-child td { border-bottom: none; }
+  .dim-label { color: #555; width: 200px; }
+  .dim-weight { color: #999; width: 60px; font-size: 11px; }
+  .bar-wrap { width: 100px; }
+  .bar-bg { height: 4px; background: #e5e5e5; border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; }
+  .just { color: #555; font-size: 12px; }
+  .override-section { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+  .override-section h2 { font-size: 14px; margin-bottom: 12px; color: #92400e; }
+  .override-entry { font-size: 12px; color: #555; padding: 4px 0; border-bottom: 1px solid #fde68a; }
+  .override-entry:last-child { border-bottom: none; }
+  footer { text-align: center; font-size: 11px; color: #aaa; margin-top: 32px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Shortlist Report — {{ jd.title }}</h1>
+  <p class="meta">Generated: {{ generated_at }} &nbsp;·&nbsp; {{ ranked|length }} candidate(s) evaluated</p>
+
+  <!-- Summary stats -->
+  <div class="summary">
+    <div class="stat">
+      <div class="stat-n">{{ ranked|length }}</div>
+      <div class="stat-l">Total evaluated</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" style="color:#059669">{{ ranked|selectattr('2.recommendation','equalto','Hire')|list|length }}</div>
+      <div class="stat-l">Recommended hire</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" style="color:#d97706">{{ ranked|selectattr('2.recommendation','equalto','Review')|list|length }}</div>
+      <div class="stat-l">For review</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" style="color:#dc2626">{{ ranked|selectattr('2.recommendation','equalto','No Hire')|list|length }}</div>
+      <div class="stat-l">No hire</div>
+    </div>
+  </div>
+
+  <!-- Ranked table -->
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Candidate</th>
+        <th>Source</th>
+        <th>Skills (30%)</th>
+        <th>Exp (25%)</th>
+        <th>Edu (15%)</th>
+        <th>Portfolio (20%)</th>
+        <th>Comm (10%)</th>
+        <th>Total</th>
+        <th>Decision</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rank, profile, score in ranked %}
+      <tr>
+        <td>{{ rank }}</td>
+        <td><strong>{{ profile.name }}</strong></td>
+        <td style="color:#999;font-size:11px">{{ profile.source_file }}</td>
+        <td class="score-cell {% if score.skills_match.score >= 7 %}hi{% elif score.skills_match.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.skills_match.score) }}
+        </td>
+        <td class="score-cell {% if score.experience_relevance.score >= 7 %}hi{% elif score.experience_relevance.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.experience_relevance.score) }}
+        </td>
+        <td class="score-cell {% if score.education_certs.score >= 7 %}hi{% elif score.education_certs.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.education_certs.score) }}
+        </td>
+        <td class="score-cell {% if score.portfolio.score >= 7 %}hi{% elif score.portfolio.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.portfolio.score) }}
+        </td>
+        <td class="score-cell {% if score.communication_quality.score >= 7 %}hi{% elif score.communication_quality.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.communication_quality.score) }}
+        </td>
+        <td class="score-cell {% if score.weighted_total >= 7 %}hi{% elif score.weighted_total >= 5 %}mid{% else %}lo{% endif %}">
+          <strong>{{ "%.1f"|format(score.weighted_total) }}</strong>
+        </td>
+        <td>
+          <span class="badge {% if score.recommendation == 'Hire' %}hire{% elif score.recommendation == 'Review' %}review{% else %}no-hire{% endif %}">
+            {{ score.recommendation }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Detailed rubric per candidate -->
+  <h2 style="font-size:15px;margin-bottom:16px">Detailed rubric breakdown</h2>
+  {% for rank, profile, score in ranked %}
+  <div class="detail">
+    <div class="detail-header">
+      <span class="detail-name">#{{ rank }} {{ profile.name }}</span>
+      <span>
+        Total: <strong>{{ "%.1f"|format(score.weighted_total) }}/10</strong> &nbsp;
+        <span class="badge {% if score.recommendation == 'Hire' %}hire{% elif score.recommendation == 'Review' %}review{% else %}no-hire{% endif %}">
+          {{ score.recommendation }}
+        </span>
+      </span>
+    </div>
+    <table class="dim-table">
+      <tr>
+        <td class="dim-label">Skills match</td>
+        <td class="dim-weight">30%</td>
+        <td class="score-cell {% if score.skills_match.score >= 7 %}hi{% elif score.skills_match.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.skills_match.score) }}/10
+        </td>
+        <td class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:{{ score.skills_match.score * 10 }}%;background:{% if score.skills_match.score >= 7 %}#059669{% elif score.skills_match.score >= 4 %}#d97706{% else %}#dc2626{% endif %}"></div></div></td>
+        <td class="just">{{ score.skills_match.justification }}</td>
+      </tr>
+      <tr>
+        <td class="dim-label">Experience relevance</td>
+        <td class="dim-weight">25%</td>
+        <td class="score-cell {% if score.experience_relevance.score >= 7 %}hi{% elif score.experience_relevance.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.experience_relevance.score) }}/10
+        </td>
+        <td class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:{{ score.experience_relevance.score * 10 }}%;background:{% if score.experience_relevance.score >= 7 %}#059669{% elif score.experience_relevance.score >= 4 %}#d97706{% else %}#dc2626{% endif %}"></div></div></td>
+        <td class="just">{{ score.experience_relevance.justification }}</td>
+      </tr>
+      <tr>
+        <td class="dim-label">Education &amp; certs</td>
+        <td class="dim-weight">15%</td>
+        <td class="score-cell {% if score.education_certs.score >= 7 %}hi{% elif score.education_certs.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.education_certs.score) }}/10
+        </td>
+        <td class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:{{ score.education_certs.score * 10 }}%;background:{% if score.education_certs.score >= 7 %}#059669{% elif score.education_certs.score >= 4 %}#d97706{% else %}#dc2626{% endif %}"></div></div></td>
+        <td class="just">{{ score.education_certs.justification }}</td>
+      </tr>
+      <tr>
+        <td class="dim-label">Portfolio</td>
+        <td class="dim-weight">20%</td>
+        <td class="score-cell {% if score.portfolio.score >= 7 %}hi{% elif score.portfolio.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.portfolio.score) }}/10
+        </td>
+        <td class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:{{ score.portfolio.score * 10 }}%;background:{% if score.portfolio.score >= 7 %}#059669{% elif score.portfolio.score >= 4 %}#d97706{% else %}#dc2626{% endif %}"></div></div></td>
+        <td class="just">{{ score.portfolio.justification }}</td>
+      </tr>
+      <tr>
+        <td class="dim-label">Communication quality</td>
+        <td class="dim-weight">10%</td>
+        <td class="score-cell {% if score.communication_quality.score >= 7 %}hi{% elif score.communication_quality.score >= 4 %}mid{% else %}lo{% endif %}">
+          {{ "%.1f"|format(score.communication_quality.score) }}/10
+        </td>
+        <td class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:{{ score.communication_quality.score * 10 }}%;background:{% if score.communication_quality.score >= 7 %}#059669{% elif score.communication_quality.score >= 4 %}#d97706{% else %}#dc2626{% endif %}"></div></div></td>
+        <td class="just">{{ score.communication_quality.justification }}</td>
+      </tr>
+    </table>
+  </div>
+  {% endfor %}
+
+  <!-- Override log -->
+  {% if overrides %}
+  <div class="override-section">
+    <h2>HR overrides &amp; flags ({{ overrides|length }})</h2>
+    {% for entry in overrides %}
+    <div class="override-entry">
+      <strong>{{ entry.timestamp[:16] }}</strong> &nbsp;·&nbsp;
+      {% if entry.type == 'override' %}
+        Score override — {{ entry.candidate }} · {{ entry.dimension }} changed {{ entry.old_score }} → {{ entry.new_score }} · "{{ entry.reason }}"
+      {% else %}
+        Flag — {{ entry.candidate }} · "{{ entry.reason }}"
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <footer>Generated by HR Shortlisting Agent · {{ generated_at }}</footer>
+</div>
+</body>
+</html>

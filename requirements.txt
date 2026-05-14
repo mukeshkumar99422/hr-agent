@@ -1,0 +1,27 @@
+# LLM, Agent Framework
+langchain
+langchain-google-genai        # Gemini via Google AI Studio
+langchain-community           # PDFPlumber loader + SQLiteCache
+
+# Google Gemini SDK
+google-genai                  # consolidated SDK (used by langchain-google-genai 4.0+)
+
+# Document parsing
+pdfplumber                    # PDF text extraction
+python-docx                   # DOCX text extraction
+
+# Data validation
+pydantic                      # structured LLM output validation
+
+# Security
+bleach                        # HTML strip + prompt injection guard
+python-dotenv                 # load .env file
+
+# Report generation
+jinja2                        # HTML report templating
+
+# UI
+streamlit                     # web UI
+
+# Utilities
+python-dateutil               # date parsing helpers

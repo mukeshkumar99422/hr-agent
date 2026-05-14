@@ -1,0 +1,5 @@
+.env
+__pycache__/
+myenv/
+.langchain_cache.db
+outputs/
