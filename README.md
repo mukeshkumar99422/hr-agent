@@ -2,8 +2,6 @@
 
 An AI agent that helps HR teams evaluate candidates faster and more consistently. Upload a job description and a batch of resumes or LinkedIn profiles — the agent parses everything, scores each candidate across 5 weighted dimensions using Google Gemini, ranks them, and generates a downloadable shortlist report. HR can override any score with a reason, and every change is logged for audit.
 
-Built for the AI Enablement Internship — Task 1.
-
 ---
 
 ## Features
@@ -139,8 +137,3 @@ The app opens at `http://localhost:8501`.
 - Score totals and recommendations are recalculated in Python — never trusted directly from LLM output
 - Every HR override requires a written reason and is permanently logged
 
----
-
-## License
-
-Built for educational/internship purposes.
